@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { isPlatform } from '@ionic/react';
 
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Storage } from '@capacitor/storage';
-import { Capacitor } from '@capacitor/core';
 
 const PHOTO_STORAGE = 'photos';
 
@@ -16,7 +14,7 @@ export interface UserPhoto {
 export function usePhotoGallery() {
     const savePicture = async (photo: Photo, fileName: string): Promise<UserPhoto> => {
       const base64Data = await base64FromPath(photo.webPath!);
-      const savedFile = await Filesystem.writeFile({
+      await Filesystem.writeFile({
         path: fileName,
         data: base64Data,
         directory: Directory.Data,
