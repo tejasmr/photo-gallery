@@ -6,7 +6,7 @@ import UserPhoto from "./UserPhoto";
 import { Storage } from "@capacitor/storage";
 import { useEffect, useState } from "react";
 
-export default function usePhotoService() {
+export default function usePhotoService(): PhotoServiceReturn {
     const [photos, setPhotos] = useState<UserPhoto[]>([]);
     const readPhoto = async (filepath: string): Promise<ReadFileResult> => {
         return await Filesystem.readFile({
@@ -42,10 +42,10 @@ export default function usePhotoService() {
         const stats = await getPhotoStats(filename)
         return { filepath: filename, webviewPath: photo.webPath, size: stats.size };
     };
-    const deletePhoto = async (photo: UserPhoto) => {
-        const newPhotos = photos.filter((p: UserPhoto) => p.filepath !== photo.filepath);
+    const deletePhoto = async (filepath: string) => {
+        const newPhotos = photos.filter((p: UserPhoto) => p.filepath !== filepath);
         Storage.set({ key: PHOTO_STORAGE, value: JSON.stringify(newPhotos) });
-        const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
+        const filename = filepath.substr(filepath.lastIndexOf('/') + 1);
         await Filesystem.deleteFile({
             path: filename,
             directory: Directory.Data,
@@ -92,4 +92,20 @@ export default function usePhotoService() {
         takePhoto,
         getPhotoStats,
     };
+}
+
+interface PhotoServiceReturn {
+    photos: UserPhoto[],
+    readPhoto: (filepath: string) => Promise<ReadFileResult>,
+    getPhoto: (filepath: string) => Promise<UserPhoto>,
+    writePhoto: (photo: Photo, filename: string) => Promise<void>,
+    savePhoto: (photo: Photo, filename: string) => Promise<UserPhoto>,
+    deletePhoto: (filepath: string) => Promise<void>,
+    capturePhoto: () => Promise<Photo>,
+    takePhoto: () => Promise<void>,
+    getPhotoStats: (filename: string) => Promise<StatResult>,
+}
+
+export interface PhotoServiceProps {
+    photoService: PhotoServiceReturn;
 }

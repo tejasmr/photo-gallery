@@ -27,21 +27,29 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import { PhotoViewer } from './pages/PhotoViewer';
+import usePhotoService from './hooks/usePhotoService';
 
 setupIonicReact();
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-        <IonRouterOutlet>
-          <Route exact path="/photos">
-            <PhotoGallery />
-          </Route>
-          <Redirect exact from="/" to="/photos" />
-          <Route path='/photos/details/:filepath' component={PhotoViewer}/>
-        </IonRouterOutlet>
-    </IonReactRouter>
-  </IonApp>
-);
+const App: React.FC = () => {
+  const photoService = usePhotoService();
+  return (
+    <IonApp>
+      <IonReactRouter>
+          <IonRouterOutlet>
+            <Route exact path="/photos">
+              <PhotoGallery photoService={photoService}/>
+            </Route>
+            <Redirect exact from="/" to="/photos" />
+            <Route 
+              path='/photos/details/:filepath' 
+              render={(props) => 
+              <PhotoViewer photoService={{photoService}} {...props} /> 
+            }/>
+          </IonRouterOutlet>
+      </IonReactRouter>
+    </IonApp>
+  );
+};
 
 export default App;

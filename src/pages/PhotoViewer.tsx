@@ -5,19 +5,23 @@ import UserPhoto from "../hooks/UserPhoto";
 import './PhotoViewer.css';
 import { parseExtension, parseName, parseSize } from "../hooks/parser";
 import { close, trash } from "ionicons/icons";
-import usePhotoService from "../hooks/usePhotoService";
+import { PhotoServiceProps } from "../hooks/usePhotoService";
 
-export const PhotoViewer: React.FC<RouteComponentProps<{filepath: string}>> = ({ match }) => {
-    const filepath = match.params.filepath;
-    const { getPhoto } = usePhotoService();
+interface PhotoViewerProps extends RouteComponentProps<{filepath: string}>{
+    photoService: PhotoServiceProps
+}
+
+export const PhotoViewer: React.FC<PhotoViewerProps> = ({ match, photoService }) => {
     const [photo, setPhoto] = useState<UserPhoto>({filepath: 'Undefined', webviewPath: '', size: 0});
+    const { filepath } = match.params;
+    const { getPhoto, deletePhoto } = photoService.photoService;
     const getPhotoWrapper = async () => {
         const photo = await getPhoto(filepath);
+        console.log(filepath);
         setPhoto(photo);
     };
     useEffect(() => {
-        if(photo.webviewPath === '')
-            getPhotoWrapper();
+        getPhotoWrapper();
     });
     return (
         <IonPage>
@@ -32,7 +36,7 @@ export const PhotoViewer: React.FC<RouteComponentProps<{filepath: string}>> = ({
                         <IonBadge color="success">{parseExtension(photo.filepath)}</IonBadge>
                     </IonItemGroup>
                     <IonItemGroup id="actionButtonGroup">
-                        <IonButton color="danger">
+                        <IonButton onClick={() => deletePhoto(photo.filepath)} routerLink="/photos" color="danger">
                             <IonIcon icon={trash} />
                         </IonButton>
                         <IonButton routerLink="/photos" color="warning">

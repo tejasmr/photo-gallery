@@ -1,14 +1,15 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import { useState } from 'react';
-import usePhotoService from '../hooks/usePhotoService';
+import { PhotoServiceProps } from '../hooks/usePhotoService';
 
 import PhotoCapture from './PhotoCapture';
 
 import PhotoGrid from './PhotoGrid';
 import PhotoScroller from './PhotoScroller';
 
-const PhotoGallery: React.FC = () => {
-  const { photos, takePhoto } = usePhotoService();
+
+const PhotoGallery: React.FC<PhotoServiceProps> = (photoService: PhotoServiceProps) => {
+  const { photos, takePhoto } = photoService.photoService;
   const [ isInfiniteDisabled, setInfiniteDisabled ] = useState(false);
 
   const loadData = (ev: any) => {
