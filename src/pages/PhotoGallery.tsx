@@ -1,14 +1,25 @@
-import { IonActionSheet, IonCol, IonContent, IonFab, IonFabButton, IonGrid, IonHeader, IonIcon, IonImg, IonPage, IonRow, IonTitle, IonToolbar } from '@ionic/react';
-import { camera, trash } from 'ionicons/icons';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import { useState } from 'react';
+import usePhotoService from '../hooks/usePhotoService';
 
-import { usePhotoGallery, UserPhoto } from '../hooks/usePhotoGallery';
+import PhotoCapture from './PhotoCapture';
 
-import './PhotoGallery.css';
+import PhotoGrid from './PhotoGrid';
+import PhotoScroller from './PhotoScroller';
 
 const PhotoGallery: React.FC = () => {
-  const { photos, takePhoto, deletePhoto } = usePhotoGallery();
-  const [photoToDelete, setPhotoToDelete] = useState<UserPhoto>();
+  const { photos, takePhoto } = usePhotoService();
+  const [ isInfiniteDisabled, setInfiniteDisabled ] = useState(false);
+
+  const loadData = (ev: any) => {
+    setTimeout(() => {
+      console.log('Loaded data');
+      ev.target.complete();
+      if (photos.length === 1000) {
+        setInfiniteDisabled(true);
+      }
+    }, 500);
+  }  
   return (
     <IonPage>
       <IonHeader>
@@ -17,44 +28,9 @@ const PhotoGallery: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
-        <IonGrid>
-          <IonRow>
-            {photos.map((photo, index) => (
-              <IonCol size="3" key={index}>
-                <IonImg src={photo.webviewPath} onClick={() => setPhotoToDelete(photo)}/>
-              </IonCol>
-            ))}
-          </IonRow>
-        </IonGrid>
-        <IonFab vertical="bottom" horizontal="center" slot="fixed">
-          <IonFabButton 
-          onClick={() => takePhoto()}
-          >
-            <IonIcon icon={camera}></IonIcon>
-          </IonFabButton>
-        </IonFab>
-        <IonActionSheet
-          isOpen={!!photoToDelete}
-          buttons={[
-            {
-              text: 'Delete',
-              role: 'destructive',
-              icon: trash,
-              handler: () => {
-                if (photoToDelete) {
-                  deletePhoto(photoToDelete);
-                  setPhotoToDelete(undefined);
-                }
-              },
-            },
-            {
-              text: 'Cancel',
-              icon: 'close',
-              role: 'cancel',
-            },
-          ]}
-          onDidDismiss={() => setPhotoToDelete(undefined)}
-        />
+        <PhotoGrid photos={photos} />
+        <PhotoScroller loadData={loadData} isInfiniteDisabled={isInfiniteDisabled} />
+        <PhotoCapture takePhoto={takePhoto} />
       </IonContent>
     </IonPage>
   );
